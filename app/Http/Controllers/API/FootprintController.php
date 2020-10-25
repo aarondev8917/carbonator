@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Repositories\FootprintRepository;
 use Illuminate\Http\Request;
 
+use App\Http\Middleware\Middleware;
+
 class FootprintController extends Controller
 {
 
     public function __construct(FootprintRepository $footprintRepository )
     {
         $this->footprintRepository = $footprintRepository;
+        $this->middleware('cache.response', ['except' => ['index','show']]);
     }   
     /**
      * Display a listing of the resource.
@@ -36,9 +39,16 @@ class FootprintController extends Controller
         $footprintParams = [
             'activity' => $request->input('activity'),
             'activityType' => $request->input('activityType'),
-            'country' =>  $request->input('country'),
-            'fuelType' => $request->input('fuelType')
+            'country' =>  $request->input('country')
         ];
+
+        if(!empty($request->input('fuelType'))){
+            $footprintParams['fuelType'] = $request->input('fuelType');
+        }
+
+        if(!empty($request->input('mode'))){
+            $footprintParams['mode'] = $request->input('mode');
+        }
 
         return $this->footprintRepository->getFootprint($footprintParams);
 
