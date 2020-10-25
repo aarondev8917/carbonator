@@ -7,6 +7,7 @@ use App\Repositories\FootprintRepository;
 use Illuminate\Http\Request;
 
 use App\Http\Middleware\Middleware;
+use DB;
 
 class FootprintController extends Controller
 {
@@ -34,23 +35,33 @@ class FootprintController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        //echo "hi";
+    
         $footprintParams = [
             'activity' => $request->input('activity'),
             'activityType' => $request->input('activityType'),
             'country' =>  $request->input('country')
         ];
 
+        $insertParams = [
+            'activity' => $request->input('activity'),
+            'activity_type' => $request->input('activityType'),
+            'country' =>  $request->input('country')
+        ];
+
         if(!empty($request->input('fuelType'))){
             $footprintParams['fuelType'] = $request->input('fuelType');
+            $insertParams['fuel_type_id'] = DB::table('fuelType')->where('name',  $request->input('fuelType'))->first();
         }
 
         if(!empty($request->input('mode'))){
             $footprintParams['mode'] = $request->input('mode');
+            $insertParams['mode_id'] = DB::table('modes')->where('name',  $request->input('mode'))->first();
         }
 
-        return $this->footprintRepository->getFootprint($footprintParams);
+        $response =  $this->footprintRepository->getFootprint($footprintParams);
+        // $insertParams['response'] = $response->getData();
+        // DB::table('footprints')->insert([$insertParams]);
+        return $response;
 
 
     }

@@ -24,6 +24,7 @@ class CreateFootprintsTable extends Migration
             $table->index('mode_id');
             $table->foreign('mode_id')->references('id')->on('modes')->onDelete('cascade');
             $table->char('country', 5); //required
+            $table->mediumText('response');
             $table->timestamps();
         });
     }
