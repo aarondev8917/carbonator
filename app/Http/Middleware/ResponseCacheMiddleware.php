@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Cache;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use App\Rules\Lowercase;
 use App\Rules\Supportedcountries;
 
@@ -19,12 +20,33 @@ class ResponseCacheMiddleware
      */
     public function handle($request, Closure $next)
     {
-
-        $validator = Validator::make($request->all(), [
+        $validatorArray = [
             'activity' => 'required|integer|gt:0',
             'activityType' => 'required|string',
-            'country' => ['required', 'string', new Lowercase, new Supportedcountries]
-        ]);
+            'country' => ['required', 'string', new Lowercase, new Supportedcountries],
+            'activityType' => [Rule::in(['miles', 'fuel'])]
+        ];
+
+        if($request->has('fuelType') && $request->filled('fuelType')){
+            $fuelTypeInput = $request->input('fuelType');
+            $validatorArray['fuelType'] = ['required',
+                Rule::exists('fuelType', 'name')->where(function ($query) use($fuelTypeInput ) {
+                    return $query->where('name', $fuelTypeInput);
+                })
+            ];
+        }
+
+        if($request->has('mode')  && $request->filled('mode')){
+            $modeInput = $request->input('mode');
+            $validatorArray['mode'] = ['required',
+                Rule::exists('modes', 'name')->where(function ($query) use($modeInput) {
+                    return $query->where('name', $modeInput);
+                })
+            ];
+        }
+        
+        
+        $validator = Validator::make($request->all(), $validatorArray);
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -32,7 +54,7 @@ class ResponseCacheMiddleware
                 return response()->json([
                     'error' => true,
                     'message' => $message
-                 ],200); 
+                 ],400); 
             }
         }
 
