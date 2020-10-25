@@ -14,3 +14,7 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('footprint', function () {
+    return view('form', ['name' => 'Samantha']);
+});
