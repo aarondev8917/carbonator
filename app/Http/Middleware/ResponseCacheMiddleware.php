@@ -6,6 +6,7 @@ use Closure;
 use Cache;
 use Illuminate\Support\Facades\Validator;
 use App\Rules\Lowercase;
+use App\Rules\Supportedcountries;
 
 class ResponseCacheMiddleware
 {
@@ -22,7 +23,7 @@ class ResponseCacheMiddleware
         $validator = Validator::make($request->all(), [
             'activity' => 'required|integer|gt:0',
             'activityType' => 'required|string',
-            'country' => ['required', 'string', new Lowercase]
+            'country' => ['required', 'string', new Lowercase, new Supportedcountries]
         ]);
 
         if ($validator->fails()) {
